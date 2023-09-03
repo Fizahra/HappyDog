@@ -1,7 +1,51 @@
 <resources>
     <string name="app_name">Happy Dog</string>
+    <string name="didnt_have">Didn\'t have an account?</string>
+    <string name="register">Register now!</string>
+    <string name="already">Already have an account?</string>
+    <string name="login">Login!</string>
+    <string name="empty">Can\'t be empty!</string>
+    <string name="error_email">Email invalid!</string>
+    <string name="error_password">At least contain 8 characters</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="title_home">Home</string>
-    <string name="title_article">Article</string>
     <string name="title_profile">Profile</string>
+    <string name="title_camera">Camera</string>
+    <string name="title_article">Article</string>
+    <string name="logout_confirm">Are you sure want to logout?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="choose_picture">Choose a picture</string>
+    <string name="failed_get_image">Failed to get image</string>
+    <string name="failed_start_cam">Failed to start camera</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="example_article">Anak kucing akan mengeluarkan suara ‘mew’ (bernada tinggi dan
+kurus) untuk meminta bantuan yang sopan. Kemudian akan
+mengeong dengan keras dan panik untuk permintaan bantuan
+yang mendesak. Saat suara ini terdengar, biasanya induk mereka
+akan datang menghampiri.\n
+
+Sementara itu, kucing dewasa memiliki lebih banyak ragam
+mengeong. Misalnya, meong senyap yang menandakan
+permohonan perhatian yang sangat sopan yang sering kali nyaris
+tak terdengar, meow biasa untuk meminta perhatian, atau
+mengeong-ngeong berulang kali karena panik dan meminta
+bantuan.\n
+
+Selain mengeong, suara lain juga dikeluarkan untuk
+mengekspresikan isi pikiran. Misalnya mendengkur sebagai
+bentuk bahwa dirinya sedang rileks, menghibur dirinya saat
+kesakitan (biasanya terdengar dari kucing yang akan mati), atau
+meminta perhatian.\n
+Kendati demikian, suara-suara itu dapat berbeda arti bergantung
+kondisi kucing. Arti yang tepat dari semua suara ini dapat
+dimodifikasi atau ditekankan oleh ekspresi wajah, nada, volume,
+frekuensi, dan bahasa tubuhnya. Selain itu, akrab tinggal
+ bersama kucing dan kerap mendengarnya bersuara akan
+memberikan Anda pemahaman apa maksud dari keinginannya.</string>
+    <string name="registration_happy_dog">Registration Happy Dog</string>
+    <string name="login_happy_dog">Login Happy Dog</string>
+    <string name="already_have_an_acc">Already have an acc?</string>
+    <string name="go_to_login_now">Go to Login now!</string>
+    <string name="logout">Logout</string>
 </resources>

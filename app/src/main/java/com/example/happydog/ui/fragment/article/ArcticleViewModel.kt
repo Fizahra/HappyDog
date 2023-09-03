@@ -1,4 +1,4 @@
-package com.example.happydog.ui.ui.article
+package com.example.happydog.ui.fragment.article
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
