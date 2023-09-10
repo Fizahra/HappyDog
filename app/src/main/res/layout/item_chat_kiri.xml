@@ -31,6 +31,17 @@
             android:textSize="16sp"
             tools:text="Fitri Az-Zahra Ramadhini"/>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="14:00"
+            android:layout_weight="1"
+            android:id="@+id/timeView"
+            android:textStyle="italic"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="10dp"/>
+
+
     </LinearLayout>
 
 </LinearLayout>

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "206531445527",
+    "project_id": "happy-dog-897ee",
+    "storage_bucket": "happy-dog-897ee.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:206531445527:android:5320d8506bed866f78ed52",
+        "android_client_info": {
+          "package_name": "com.example.happydog"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCMFe7Tz4vziLOrmF9acPVY1qIgZWo4lk4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

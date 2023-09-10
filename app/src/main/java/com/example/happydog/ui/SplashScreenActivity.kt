@@ -7,9 +7,12 @@ import android.os.Handler
 import android.os.Looper
 import android.view.WindowManager
 import com.example.happydog.R
+import com.example.happydog.ui.auth.LoginActivity
+import com.google.firebase.auth.FirebaseAuth
 
 @Suppress("DEPRECATION")
 class SplashScreenActivity : AppCompatActivity() {
+    lateinit private var fbauth: FirebaseAuth
     companion object{
         const val LOADING_TIME = 1500L
     }
@@ -17,13 +20,18 @@ class SplashScreenActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash_screen)
 
+        fbauth = FirebaseAuth.getInstance()
+
         window.setFlags(
             WindowManager.LayoutParams.FLAG_FULLSCREEN,
             WindowManager.LayoutParams.FLAG_FULLSCREEN
         )
 
         Handler(Looper.getMainLooper()).postDelayed({
-            startActivity(Intent(this, MainActivity::class.java))
+            if (fbauth.currentUser!=null){ startActivity(Intent(this, MainActivity::class.java))
+            } else {
+                startActivity(Intent(this, LoginActivity::class.java))
+            }
             finish()
         }, LOADING_TIME)
     }
