@@ -30,6 +30,16 @@
             card_view:layout_constraintStart_toStartOf="parent"
             card_view:layout_constraintTop_toTopOf="parent" />
 
+        <ImageView
+            android:id="@+id/statusOnline"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_marginStart="49dp"
+            card_view:layout_constraintBottom_toBottomOf="parent"
+            card_view:layout_constraintStart_toStartOf="parent"
+            card_view:layout_constraintTop_toTopOf="@id/img_chat"
+            card_view:layout_constraintVertical_bias="0.0" />
+
         <TextView
             android:id="@+id/tv_name"
             android:layout_width="0dp"

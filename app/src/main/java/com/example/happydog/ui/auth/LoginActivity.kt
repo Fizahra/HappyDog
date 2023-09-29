@@ -2,11 +2,18 @@
 
 package com.example.happydog.ui.auth
 
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.app.ProgressDialog
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.util.Patterns
+import android.view.View
 import android.widget.Toast
+import com.example.happydog.R
 import com.example.happydog.databinding.ActivityLoginBinding
 import com.example.happydog.ui.MainActivity
 import com.google.firebase.auth.FirebaseAuth
@@ -28,8 +35,46 @@ class LoginActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         fbauth = FirebaseAuth.getInstance()
+        setEnable()
+        playAnimation()
+
 
         pds = ProgressDialog(this)
+
+        binding.etEmail.addTextChangedListener(object: TextWatcher{
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+
+            }
+
+            override fun afterTextChanged(s: Editable) {
+                if(!Patterns.EMAIL_ADDRESS.matcher(s.toString()).matches()) {
+                    binding.etEmail.error = resources.getString(R.string.error_email)
+                }
+                setEnable()
+
+            }
+        })
+
+        binding.etPassword.addTextChangedListener(object: TextWatcher {
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+
+            }
+
+            override fun afterTextChanged(s: Editable) {
+                if(s.toString().length < 8) {
+                    binding.etPassword.error = resources.getString(R.string.error_password)
+                }
+                setEnable()
+            }
+        })
 
         binding.tvRegister.setOnClickListener{
             val intent = Intent(this, RegisterActivity::class.java)
@@ -40,12 +85,6 @@ class LoginActivity : AppCompatActivity() {
             email = binding.etEmail.text.toString()
             password = binding.etPassword.text.toString()
 
-            if (binding.etEmail.text.isEmpty()){
-                Toast.makeText(this, "Enter Email", Toast.LENGTH_SHORT).show()
-            }
-            if (binding.etPassword.text.isEmpty()){
-                Toast.makeText(this, "Enter Password", Toast.LENGTH_SHORT).show()
-            }
             if (binding.etEmail.text.isNotEmpty() && binding.etPassword.text.isNotEmpty()){
                 signIn(password, email)
             }
@@ -75,6 +114,29 @@ class LoginActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun playAnimation(){
+        ObjectAnimator.ofFloat(binding.imageView2, View.TRANSLATION_X, -30f, 30f).apply{
+            duration = 6000
+            repeatCount = ObjectAnimator.INFINITE
+            repeatMode = ObjectAnimator.REVERSE
+        }.start()
+
+        val editemail = ObjectAnimator.ofFloat(binding.etEmail, View.ALPHA, 1F).setDuration(150)
+        val editpw = ObjectAnimator.ofFloat(binding.etPassword, View.ALPHA, 1F).setDuration(150)
+        val button = ObjectAnimator.ofFloat(binding.button, View.ALPHA, 1F).setDuration(300)
+        val tv = ObjectAnimator.ofFloat(binding.textView, View.ALPHA, 1F).setDuration(300)
+        val tvregis = ObjectAnimator.ofFloat(binding.tvRegister, View.ALPHA, 1F).setDuration(300)
+
+        AnimatorSet().apply{
+            playSequentially(editemail, editpw, button, tv, tvregis)
+            startDelay=300
+        }.start()
+    }
+
+    private fun setEnable(){
+        binding.button.isEnabled = binding.etEmail.text.isNotEmpty() && binding.etPassword.text.isNotEmpty()
     }
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
