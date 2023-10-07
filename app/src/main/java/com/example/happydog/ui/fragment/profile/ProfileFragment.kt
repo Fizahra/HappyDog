@@ -7,18 +7,23 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.bumptech.glide.Glide
 import com.example.happydog.R
+import com.example.happydog.adapter.UserAdapter
 import com.example.happydog.databinding.FragmentProfileBinding
+import com.example.happydog.model.Users
+import com.example.happydog.mvvm.ChatViewModel
 import com.example.happydog.ui.auth.LoginActivity
 import com.google.firebase.auth.FirebaseAuth
 
-class ProfileFragment : Fragment() {
+class ProfileFragment : Fragment(){
 
     private var _binding: FragmentProfileBinding? = null
     private lateinit var fbAuth : FirebaseAuth
+    lateinit var vm : ChatViewModel
     lateinit var pd : ProgressDialog
 
     // This property is only valid between onCreateView and
@@ -38,10 +43,14 @@ class ProfileFragment : Fragment() {
 
         fbAuth = FirebaseAuth.getInstance()
         pd = ProgressDialog(activity)
+        vm = ViewModelProvider(this).get(ChatViewModel::class.java)
 
         binding.button.setOnClickListener{
             logOut()
         }
+        vm.imageUrl.observe(viewLifecycleOwner, Observer {
+            Glide.with(requireContext()).load(it).into(binding.imgProfile)
+        })
 
         return root
     }
@@ -64,4 +73,5 @@ class ProfileFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
 }

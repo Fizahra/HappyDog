@@ -156,7 +156,7 @@ class RegisterActivity : AppCompatActivity() {
             if (task.isSuccessful){
                 val user = auth.currentUser
                 val dataHashMap = hashMapOf("userid" to user!!.uid!!, "username" to name, "useremail" to email, "status" to "default",
-                    "imageUrl" to "https://github.com/Fizahra/HappyDog/blob/master/app/src/main/res/drawable/logo_happyvet.png", "usernomor" to nomor, "role" to "user")
+                    "imageUrl" to "https://en.wikipedia.org/wiki/File:Taylor_Swift_at_the_2023_MTV_Video_Music_Awards_(3).png", "usernomor" to nomor, "role" to "user")
 
                 firestore.collection("Users").document(user.uid).set(dataHashMap)
 

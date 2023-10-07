@@ -15,9 +15,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.happydog.R
 import com.example.happydog.adapter.UserAdapter
 import com.example.happydog.databinding.FragmentHomeBinding
+import com.example.happydog.model.Users
 import com.example.happydog.mvvm.ChatViewModel
 
-class HomeFragment : Fragment() {
+class HomeFragment : Fragment(), UserAdapter.OnItemClickListener {
 
     private var _binding: FragmentHomeBinding? = null
     lateinit var rv : RecyclerView
@@ -55,6 +56,7 @@ class HomeFragment : Fragment() {
             rv.adapter = adapter
 
         })
+        adapter.setOnClickListener(this)
 
         super.onViewCreated(view, savedInstanceState)
     }
@@ -62,5 +64,9 @@ class HomeFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onUserSelected(position: Int, users: Users) {
+        TODO("Not yet implemented")
     }
 }
