@@ -4,21 +4,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Adapter
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.get
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.happydog.R
 import com.example.happydog.adapter.UserAdapter
 import com.example.happydog.databinding.FragmentHomeBinding
-import com.example.happydog.model.Users
 import com.example.happydog.mvvm.ChatViewModel
 
-class HomeFragment : Fragment(), UserAdapter.OnItemClickListener {
+class HomeFragment : Fragment(){
 
     private var _binding: FragmentHomeBinding? = null
     lateinit var rv : RecyclerView
@@ -56,7 +52,6 @@ class HomeFragment : Fragment(), UserAdapter.OnItemClickListener {
             rv.adapter = adapter
 
         })
-        adapter.setOnClickListener(this)
 
         super.onViewCreated(view, savedInstanceState)
     }
@@ -66,7 +61,4 @@ class HomeFragment : Fragment(), UserAdapter.OnItemClickListener {
         _binding = null
     }
 
-    override fun onUserSelected(position: Int, users: Users) {
-        TODO("Not yet implemented")
-    }
 }

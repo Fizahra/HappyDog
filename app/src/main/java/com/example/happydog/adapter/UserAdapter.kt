@@ -1,6 +1,7 @@
 package com.example.happydog.adapter
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,11 +11,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.happydog.R
 import com.example.happydog.model.Users
+import com.example.happydog.ui.chat.ChatActivity
 
 class UserAdapter: RecyclerView.Adapter<UserAdapter.UserHolder>(){
 
     private var listUsers = listOf<Users>()
-    private var listener : OnItemClickListener? = null
+//    private var listener : OnItemClickListener? = null
     class UserHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val username: TextView = itemView.findViewById(R.id.tv_name)
         val role: TextView = itemView.findViewById(R.id.tv_role)
@@ -43,9 +45,12 @@ class UserAdapter: RecyclerView.Adapter<UserAdapter.UserHolder>(){
 
         val role = users.role
         holder.role.setText(role)
-        Glide.with(holder.itemView.context).load(users.imageUrl).into(holder.img)
+        Glide.with(holder.itemView.context).load(users.imageUrl).placeholder(R.drawable.logo_happyvet).into(holder.img)
         holder.itemView.setOnClickListener {
-            listener?.onUserSelected(position, users)
+//            listener?.onUserSelected(position, users)
+            val intent = Intent(holder.itemView.context, ChatActivity::class.java)
+            intent.putExtra("UserId", users.userid)
+            holder.itemView.context.startActivity(intent)
         }
 
     }
@@ -56,12 +61,12 @@ class UserAdapter: RecyclerView.Adapter<UserAdapter.UserHolder>(){
         notifyDataSetChanged()
     }
 
-    fun setOnClickListener(listener: OnItemClickListener){
-        this.listener = listener
-    }
-
-    interface OnItemClickListener{
-        fun onUserSelected(position: Int, users: Users)
-    }
+//    fun setOnClickListener(listener: OnItemClickListener){
+//        this.listener = listener
+//    }
+//
+//    interface OnItemClickListener{
+//        fun onUserSelected(position: Int, users: Users)
+//    }
 }
 
