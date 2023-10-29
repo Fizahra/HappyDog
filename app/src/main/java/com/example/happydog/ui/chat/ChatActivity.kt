@@ -2,11 +2,31 @@ package com.example.happydog.ui.chat
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
+import com.bumptech.glide.Glide
 import com.example.happydog.R
+import com.example.happydog.databinding.ActivityChatBinding
+import com.example.happydog.model.Users
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class ChatActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityChatBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_chat)
+        binding = ActivityChatBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        val users = intent.getParcelableExtra<Users>("UserId")!!
+        val nama = users.username
+//        users = intent.getParcelableExtra("UserId")
+        Log.d("users","ini username $nama")
+
+        binding.tvName.text = nama
+        binding.tvStatus.text = users.status
+        Glide.with(this).load(users.imageUrl).placeholder(R.drawable.logo_happyvet).into(binding.imgUser)
+        val firebase = FirebaseAuth.getInstance().currentUser
+//        val reference = FirebaseFirestore.getInstance().document()
+//            FirebaseDatabase.getInstance().getReference("users").child(users)
     }
 }

@@ -23,30 +23,30 @@ class ChatViewModel : ViewModel() {
     val usersRepo = UsersRepo()
 
     init {
-        getCurrentUser()
+//        getCurrentUser()
     }
 
     fun getUser(): LiveData<List<Users>> {
         return usersRepo.getUsers()
     }
 
-    fun getCurrentUser() = viewModelScope.launch(Dispatchers.IO) {
-
-        val context = MyApp.instance.applicationContext
-
-        firestore.collection("Users").document(Utils.getUidLoggedIn())
-            .addSnapshotListener { value, error ->
-
-                if (value!!.exists() && value != null) {
-                    val users = value.toObject(Users::class.java)
-                    name.value = users?.username!!
-                    imageUrl.value = users.imageUrl!!
-
-
-                    val mysharedPrefs = SharedPrefs(context)
-                    mysharedPrefs.setValue("username", users.username!!)
-                }
-            }
-    }
+//    private fun getCurrentUser() = viewModelScope.launch(Dispatchers.IO) {
+//
+//        val context = MyApp.instance.applicationContext
+//
+//        firestore.collection("Users").document(Utils.getUidLoggedIn())
+//            .addSnapshotListener { value, error ->
+//
+//                if (value!!.exists()) {
+//                    val users = value.toObject(Users::class.java)
+//                    name.value = users?.username!!
+//                    imageUrl.value = users.imageUrl!!
+//
+//
+//                    val mysharedPrefs = SharedPrefs(context)
+//                    mysharedPrefs.setValue("username", users.username!!)
+//                }
+//            }
+//    }
 
 }

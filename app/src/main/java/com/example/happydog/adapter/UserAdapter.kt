@@ -49,7 +49,7 @@ class UserAdapter: RecyclerView.Adapter<UserAdapter.UserHolder>(){
         holder.itemView.setOnClickListener {
 //            listener?.onUserSelected(position, users)
             val intent = Intent(holder.itemView.context, ChatActivity::class.java)
-            intent.putExtra("UserId", users.userid)
+            intent.putExtra("UserId", users)
             holder.itemView.context.startActivity(intent)
         }
 
