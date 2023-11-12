@@ -5,8 +5,10 @@ import androidx.lifecycle.MutableLiveData
 import com.example.happydog.Utils
 import com.example.happydog.model.Users
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.toObject
 
 class UsersRepo {
+    val userData = MutableLiveData<Users>()
     private val firestore = FirebaseFirestore.getInstance()
 
     fun getUsers(): LiveData<List<Users>>{
@@ -30,5 +32,14 @@ class UsersRepo {
             }
         }
         return users
+    }
+
+    fun getUser(uid:String){
+        firestore.collection("Users")
+            .document(uid)
+            .get()
+            .addOnSuccessListener {
+                userData.value = it.toObject<Users>()
+            }
     }
 }

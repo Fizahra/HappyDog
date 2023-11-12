@@ -1,5 +1,6 @@
 package com.example.happydog.mvvm
 
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -19,6 +20,7 @@ class ChatViewModel : ViewModel() {
     val imageUrl = MutableLiveData<String>()
     val role = MutableLiveData<String>()
     private val firestore = FirebaseFirestore.getInstance()
+    val userData = MutableLiveData<Users>()
 
     val usersRepo = UsersRepo()
     val msgRepo = MessageRepo()
@@ -30,6 +32,10 @@ class ChatViewModel : ViewModel() {
     fun getUser(): LiveData<List<Users>> {
         return usersRepo.getUsers()
     }
+
+    fun currentUser(uid: String){
+        return usersRepo.getUser(uid)}
+
 
 //    private fun getCurrentUser() = viewModelScope.launch(Dispatchers.IO) {
 //
@@ -104,4 +110,15 @@ class ChatViewModel : ViewModel() {
         return msgRepo.getMessages(friend)
     }
 
+    fun updateProfile() = viewModelScope.launch(Dispatchers.IO) {
+        val context = MyApp.instance.applicationContext
+        val hashMapUser =
+            hashMapOf<String, Any>("username" to name.value!!, "imageUrl" to imageUrl.value!!)
+        firestore.collection("Users").document(Utils.getUidLoggedIn()).update(hashMapUser)
+            .addOnCompleteListener {
+                if (it.isSuccessful) {
+                    Toast.makeText(context, "Updated", Toast.LENGTH_SHORT).show()
+                }
+            }
+    }
 }

@@ -5,6 +5,7 @@ data class Messages(
     val receiver: String? = "",
     val message: String? = "",
     val time: String? = "",
+    val imgUrl: String?  = "",
     ) {
-    val id : String get() = "$sender-$receiver-$message-$time"
+    val id : String get() = "$sender-$receiver-$message-$time-$imgUrl"
 }
