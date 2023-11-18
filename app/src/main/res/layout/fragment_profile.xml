@@ -7,29 +7,17 @@
     android:background="@color/pale_yellow"
     tools:context=".ui.fragment.profile.ProfileFragment">
 
-<!--    <ImageView-->
-<!--        android:id="@+id/edit_profile"-->
-<!--        android:layout_width="25dp"-->
-<!--        android:layout_height="25dp"-->
-<!--        android:src="@drawable/ic_edit"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintHorizontal_bias="0.93"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        app:layout_constraintVertical_bias="0.03" />-->
-
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/img_profile"
         android:layout_width="170dp"
         android:layout_height="170dp"
         android:scaleType="centerCrop"
+        android:src="@drawable/logo_happyvet"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.191"
-        android:src="@drawable/logo_happyvet" />
+        app:layout_constraintVertical_bias="0.071" />
 
     <TextView
         android:id="@+id/tv_profile"
@@ -43,7 +31,21 @@
         app:layout_constraintEnd_toEndOf="@+id/img_profile"
         app:layout_constraintStart_toStartOf="@+id/img_profile"
         app:layout_constraintTop_toBottomOf="@+id/img_profile"
-        android:text="Ai" />
+        tools:text="Ai" />
+
+    <TextView
+        android:id="@+id/tv_role"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textSize="18sp"
+        android:gravity="center"
+        android:textColor="@color/warm_gray"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/tv_profile"
+        app:layout_constraintStart_toStartOf="@+id/tv_profile"
+        app:layout_constraintTop_toBottomOf="@+id/tv_profile"
+        tools:text="Dokter" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btn_save"
@@ -52,7 +54,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
         android:layout_marginEnd="16dp"
-        android:background="@drawable/bg_button_logout"
+        android:background="@drawable/bg_button"
         android:text="@string/save"
         android:textColor="#88000000"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -60,7 +62,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_profile"
-        app:layout_constraintVertical_bias="0.634" />
+        app:layout_constraintVertical_bias="0.396" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button"
@@ -76,5 +78,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_save"/>
+        app:layout_constraintTop_toBottomOf="@+id/btn_save"
+        app:layout_constraintVertical_bias="0.063" />
+
+    <ProgressBar
+        android:id="@+id/pb_data"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

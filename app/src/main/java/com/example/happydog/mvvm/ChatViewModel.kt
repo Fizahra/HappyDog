@@ -1,5 +1,6 @@
 package com.example.happydog.mvvm
 
+import android.net.Uri
 import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -110,15 +111,37 @@ class ChatViewModel : ViewModel() {
         return msgRepo.getMessages(friend)
     }
 
-    fun updateProfile() = viewModelScope.launch(Dispatchers.IO) {
-        val context = MyApp.instance.applicationContext
-        val hashMapUser =
-            hashMapOf<String, Any>("username" to name.value!!, "imageUrl" to imageUrl.value!!)
+//    fun updateProfile() = viewModelScope.launch(Dispatchers.IO) {
+//        val context = MyApp.instance.applicationContext
+//        val hashMapUser =
+//            hashMapOf<String, Any>("username" to name.value!!, "imageUrl" to imageUrl.value!!)
+//        firestore.collection("Users").document(Utils.getUidLoggedIn()).update(hashMapUser)
+//            .addOnCompleteListener {
+//                if (it.isSuccessful) {
+//                    Toast.makeText(context, "Updated", Toast.LENGTH_SHORT).show()
+//                }
+//            }
+//    }
+fun updateProfile() = viewModelScope.launch(Dispatchers.IO) {
+    val context = MyApp.instance.applicationContext
+    val nameValue = name.value
+    val imageUrlValue = imageUrl.value
+
+    if (nameValue != null && imageUrlValue != null) {
+        val hashMapUser = hashMapOf<String, Any>("username" to nameValue, "imageUrl" to imageUrlValue)
+
         firestore.collection("Users").document(Utils.getUidLoggedIn()).update(hashMapUser)
-            .addOnCompleteListener {
-                if (it.isSuccessful) {
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
                     Toast.makeText(context, "Updated", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, "Update failed", Toast.LENGTH_SHORT).show()
                 }
             }
+    } else {
+        // Handle the case where name.value or imageUrl.value is null
+        Toast.makeText(context, "Name or image URL is null", Toast.LENGTH_SHORT).show()
     }
+}
+
 }
