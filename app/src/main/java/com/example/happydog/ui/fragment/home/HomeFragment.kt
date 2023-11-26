@@ -43,7 +43,7 @@ class HomeFragment : Fragment(){
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         vm = ViewModelProvider(this).get(ChatViewModel::class.java)
         adapter = UserAdapter()
-        rv = view.findViewById(R.id.rv_list_doc)
+        rv = binding.rvListDoc
         rv.layoutManager = LinearLayoutManager(activity)
         rv.setHasFixedSize(true)
 

@@ -54,13 +54,4 @@ class ProfileViewModel : ViewModel() {
 
     }
 
-    fun isUserDoctor(uid: String){
-        fStore.collection("Users")
-            .document(uid)
-            .get()
-            .addOnSuccessListener {
-                isAdmin.value = it.data?.get("role") as String
-            }
-    }
-
 }

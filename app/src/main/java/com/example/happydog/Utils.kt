@@ -1,5 +1,6 @@
 package com.example.happydog
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.ContentResolver
 import android.content.ContentValues
@@ -23,6 +24,7 @@ import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 class Utils {
     companion object{
@@ -39,6 +41,15 @@ class Utils {
             return userid
         }
 
+        fun getUserLoggedIn(): String {
+
+            if (auth.currentUser!=null){
+                userid = auth.currentUser!!.displayName.toString()
+            }
+            return userid
+        }
+
+        @SuppressLint("SimpleDateFormat")
         fun getTime(): String {
 
 
@@ -49,6 +60,14 @@ class Utils {
 
             return stringdate
 
+        }
+
+        @SuppressLint("SimpleDateFormat")
+        fun getDate(): String {
+            val formatter = SimpleDateFormat("dd MMM yyyy")
+            formatter.timeZone = TimeZone.getDefault()
+            val date = formatter.format(Date())
+            return date
         }
 
     }

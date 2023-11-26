@@ -8,7 +8,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
 
 class UsersRepo {
-    val userData = MutableLiveData<Users>()
     private val firestore = FirebaseFirestore.getInstance()
 
     fun getUsers(): LiveData<List<Users>>{
@@ -22,7 +21,8 @@ class UsersRepo {
             val userList = mutableListOf<Users>()
             snapshot?.documents?.forEach{document->
                 val user = document.toObject(Users::class.java)
-                if (user!!.userid != Utils.getUidLoggedIn()){
+                //inigasi?
+                if (user!!.userid != Utils.getUidLoggedIn() && user.role != "user"){
                     user.let {
                         userList.add(it)
                     }
@@ -34,12 +34,4 @@ class UsersRepo {
         return users
     }
 
-    fun getUser(uid:String){
-        firestore.collection("Users")
-            .document(uid)
-            .get()
-            .addOnSuccessListener {
-                userData.value = it.toObject<Users>()
-            }
-    }
 }

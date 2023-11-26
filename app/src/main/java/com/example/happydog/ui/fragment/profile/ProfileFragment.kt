@@ -1,6 +1,5 @@
 package com.example.happydog.ui.fragment.profile
 
-import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.Intent
@@ -20,7 +19,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import android.Manifest
-import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
@@ -31,7 +29,6 @@ import com.example.happydog.Utils
 import com.example.happydog.databinding.FragmentProfileBinding
 import com.example.happydog.getImageUri
 import com.example.happydog.mvvm.ChatViewModel
-import com.example.happydog.ui.CameraActivity
 import com.example.happydog.ui.auth.LoginActivity
 import com.example.happydog.uriToFile
 import com.google.firebase.auth.FirebaseAuth
@@ -128,17 +125,7 @@ class ProfileFragment : Fragment(){
             builder.setItems(options) { dialog, item ->
                 when {
                     options[item] == "Take Photo" -> {
-//                        if (allPermissionsGranted()) {
-//
-//                        } else {
-//                            requestPermissions(
-//                                arrayOf(android.Manifest.permission.CAMERA),
-//                                REQUEST_CODE_PERMISSIONS
-//                            )
-//                        }
                         startCamera()
-//                        val intent = Intent(activity, CameraActivity::class.java)
-//                        launchIntentCamera.launch(intent)
                     }
                     options[item] == "Choose from Gallery" -> {
                         pickImageFromGallery()

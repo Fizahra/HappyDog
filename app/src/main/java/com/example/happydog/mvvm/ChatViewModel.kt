@@ -9,9 +9,14 @@ import androidx.lifecycle.viewModelScope
 import com.example.happydog.MyApp
 import com.example.happydog.SharedPrefs
 import com.example.happydog.Utils
+import com.example.happydog.model.Articles
 import com.example.happydog.model.Messages
 import com.example.happydog.model.Users
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.*
 
@@ -19,12 +24,16 @@ class ChatViewModel : ViewModel() {
 //    val message = MutableLiveData<String>()
     val name = MutableLiveData<String>()
     val imageUrl = MutableLiveData<String>()
+    private var fStore: FirebaseFirestore = Firebase.firestore
+    private var storage: FirebaseStorage = Firebase.storage
     val role = MutableLiveData<String>()
     private val firestore = FirebaseFirestore.getInstance()
+    var stMessage = MutableLiveData<String>()
     val userData = MutableLiveData<Users>()
 
     val usersRepo = UsersRepo()
     val msgRepo = MessageRepo()
+    val artRepo = ArticleRepo()
 
     init {
 //        getCurrentUser()
@@ -34,29 +43,9 @@ class ChatViewModel : ViewModel() {
         return usersRepo.getUsers()
     }
 
-    fun currentUser(uid: String){
-        return usersRepo.getUser(uid)}
-
-
-//    private fun getCurrentUser() = viewModelScope.launch(Dispatchers.IO) {
-//
-//        val context = MyApp.instance.applicationContext
-//
-//        firestore.collection("Users").document(Utils.getUidLoggedIn())
-//            .addSnapshotListener { value, error ->
-//
-//                if (value!!.exists()) {
-//                    val users = value.toObject(Users::class.java)
-//                    name.value = users?.username!!
-//                    imageUrl.value = users.imageUrl!!
-//
-//
-//                    val mysharedPrefs = SharedPrefs(context)
-//                    mysharedPrefs.setValue("username", users.username!!)
-//                }
-//            }
-//    }
-
+    fun getArticle(): LiveData<List<Articles>>{
+        return artRepo.getArticles()
+    }
     fun sendMessage(sender: String, receiver: String, friendname: String, friendimage: String, message: String) =
         viewModelScope.launch(Dispatchers.IO) {
 
@@ -110,6 +99,35 @@ class ChatViewModel : ViewModel() {
     fun getMessages(friend: String): LiveData<List<Messages>> {
         return msgRepo.getMessages(friend)
     }
+
+    fun uploadArticle(title: String, artikel: String, kategori: String, uri: Uri){
+        storage.getReference("Articles/$title.jpg")
+            .putFile(uri)
+            .addOnSuccessListener {
+                storage.getReference("Articles/$title.jpg").downloadUrl.addOnSuccessListener {
+                    val image = it.toString()
+                    val article= hashMapOf(
+                        "title" to title,
+                        "article" to artikel,
+                        "category" to kategori,
+                        "date" to Utils.getDate(),
+                        "author" to Utils.getUserLoggedIn(),
+                        "imageArticle" to image
+                    )
+                    fStore.collection("Articles")
+                        .document()
+                        .set(article)
+                        .addOnSuccessListener {
+                            stMessage.value = "Berhasil menambahkan artikel"
+                        }
+                }
+
+            }
+            .addOnFailureListener {
+                stMessage.value = it.message.toString()
+            }
+    }
+
 
 //    fun updateProfile() = viewModelScope.launch(Dispatchers.IO) {
 //        val context = MyApp.instance.applicationContext

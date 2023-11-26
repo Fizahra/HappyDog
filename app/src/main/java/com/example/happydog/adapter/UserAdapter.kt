@@ -16,7 +16,6 @@ import com.example.happydog.ui.chat.ChatActivity
 class UserAdapter: RecyclerView.Adapter<UserAdapter.UserHolder>(){
 
     private var listUsers = listOf<Users>()
-//    private var listener : OnItemClickListener? = null
     class UserHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val username: TextView = itemView.findViewById(R.id.tv_name)
         val role: TextView = itemView.findViewById(R.id.tv_role)
