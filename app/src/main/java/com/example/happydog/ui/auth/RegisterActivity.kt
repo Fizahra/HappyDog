@@ -190,4 +190,12 @@ class RegisterActivity : AppCompatActivity() {
             startDelay = 300
         }.start()
     }
+
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        super.onBackPressed()
+
+        finishAffinity()
+    }
+
 }

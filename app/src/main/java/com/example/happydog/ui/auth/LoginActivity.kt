@@ -142,13 +142,7 @@ class LoginActivity : AppCompatActivity() {
     override fun onBackPressed() {
         super.onBackPressed()
 
-        pds.dismiss()
-        finish()
+        finishAffinity()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        pds.dismiss()
-
-    }
 }

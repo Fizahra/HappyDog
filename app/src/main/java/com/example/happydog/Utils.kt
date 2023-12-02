@@ -30,6 +30,7 @@ class Utils {
     companion object{
         private val auth = FirebaseAuth.getInstance()
         private var userid : String = ""
+        private var username : String? = null
         const val REQUEST_IMAGE_CAPTURE = 1
         const val REQUEST_IMAGE_PICK = 2
 
@@ -42,11 +43,10 @@ class Utils {
         }
 
         fun getUserLoggedIn(): String {
-
             if (auth.currentUser!=null){
-                userid = auth.currentUser!!.displayName.toString()
+                username = auth.currentUser!!.displayName.toString()
             }
-            return userid
+            return username!!
         }
 
         @SuppressLint("SimpleDateFormat")
