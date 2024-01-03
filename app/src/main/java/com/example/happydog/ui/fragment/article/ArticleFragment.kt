@@ -21,12 +21,14 @@ import com.example.happydog.mvvm.ChatViewModel
 import com.example.happydog.ui.AddArticleActivity
 import com.example.happydog.ui.auth.LoginActivity
 import com.example.happydog.ui.fragment.profile.ProfileViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 class ArticleFragment : Fragment() {
 
     private var _binding: FragmentArticleBinding? = null
     lateinit var rv : RecyclerView
     lateinit var adapter: ArticleAdapter
+    private lateinit var fbAuth : FirebaseAuth
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -41,6 +43,9 @@ class ArticleFragment : Fragment() {
             _binding = FragmentArticleBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
+        fbAuth = FirebaseAuth.getInstance()
+        val user = fbAuth.currentUser?.uid.toString()
+        nvm.getUser(user)
         nvm.userData.observe(viewLifecycleOwner){
             if (it.role != "user"){
                 binding.fabAddArticle.visibility = View.VISIBLE

@@ -9,7 +9,13 @@
         android:id="@+id/navigation_home"
         android:name="com.example.happydog.ui.fragment.home.HomeFragment"
         android:label="@string/title_home"
-        tools:layout="@layout/fragment_home"></fragment>
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/navigation_detection"
+        android:name="com.example.happydog.ui.fragment.detection.DetectionFragment"
+        android:label="@string/title_detection"
+        tools:layout="@layout/fragment_detection" />
 
     <fragment
         android:id="@+id/navigation_article"
@@ -22,4 +28,5 @@
         android:name="com.example.happydog.ui.fragment.profile.ProfileFragment"
         android:label="@string/title_profile"
         tools:layout="@layout/fragment_profile" />
+
 </navigation>

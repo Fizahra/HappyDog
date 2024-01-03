@@ -12,8 +12,10 @@ import com.example.happydog.Utils
 import com.example.happydog.model.Articles
 import com.example.happydog.model.Messages
 import com.example.happydog.model.Users
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
@@ -21,12 +23,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.*
 
 class ChatViewModel : ViewModel() {
-//    val message = MutableLiveData<String>()
     val name = MutableLiveData<String>()
     val imageUrl = MutableLiveData<String>()
     private var fStore: FirebaseFirestore = Firebase.firestore
     private var storage: FirebaseStorage = Firebase.storage
-    val role = MutableLiveData<String>()
     private val firestore = FirebaseFirestore.getInstance()
     var stMessage = MutableLiveData<String>()
     val userData = MutableLiveData<Users>()
@@ -100,7 +100,16 @@ class ChatViewModel : ViewModel() {
         return msgRepo.getMessages(friend)
     }
 
-    fun uploadArticle(title: String, artikel: String, kategori: String, uri: Uri){
+    fun getUserr(uid: String){
+        fStore.collection("Users")
+            .document(uid)
+            .get()
+            .addOnSuccessListener {
+                userData.value = it.toObject<Users>()
+            }
+    }
+
+    fun uploadArticle(title: String, artikel: String, kategori: String, uri: Uri, nama: String){
         storage.getReference("Articles/$title.jpg")
             .putFile(uri)
             .addOnSuccessListener {
@@ -111,7 +120,7 @@ class ChatViewModel : ViewModel() {
                         "article" to artikel,
                         "category" to kategori,
                         "date" to Utils.getDate(),
-                        "author" to Utils.getUserLoggedIn(),
+                        "author" to nama,
                         "imageArticle" to image
                     )
                     fStore.collection("Articles")

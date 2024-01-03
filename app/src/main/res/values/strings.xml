@@ -49,4 +49,9 @@ memberikan Anda pemahaman apa maksud dari keinginannya.</string>
     <string name="go_to_login_now">Go to Login now!</string>
     <string name="logout">Logout</string>
     <string name="save">SAVE</string>
+    <string name="title_detection">Detection</string>
+    <string name="gallery">Gallery</string>
+    <string name="camera">Camera</string>
+    <string name="res">Dari gambar tersebut, kami mendeteksi jika peliharaanmu terkena :</string>
+    <string name="klik">klik pada image untuk mengambil atau mengupload gambar untuk dideteksi</string>
 </resources>

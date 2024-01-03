@@ -18,6 +18,7 @@ import com.google.android.datatransport.BuildConfig
 import com.google.firebase.auth.FirebaseAuth
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
@@ -118,6 +119,16 @@ fun rotateImage(file: File, isBackCamera: Boolean = false){
     }
     val res = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     res.compress(Bitmap.CompressFormat.JPEG, 100, FileOutputStream(file))
+}
+
+fun uriToBitmap(context: Context, uri: Uri): Bitmap? {
+    try{
+        val inputStream = context.contentResolver.openInputStream(uri)
+        return BitmapFactory.decodeStream(inputStream)
+    }catch (e: FileNotFoundException){
+        e.printStackTrace()
+    }
+    return null
 }
 
 fun uriToFile(selectedImg: Uri, ctx: Context): File{

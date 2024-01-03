@@ -25,13 +25,13 @@ class AddArticleActivity : AppCompatActivity() {
 
     lateinit var binding: ActivityAddArticleBinding
     lateinit var auth : FirebaseAuth
-    lateinit var firestore : FirebaseFirestore
     lateinit var title: String
     lateinit var article: String
     lateinit var categori: String
     lateinit var img: ImageView
     private var currentImageUri: Uri? = null
     private var getFile: Uri? = null
+    private lateinit var fbAuth : FirebaseAuth
     lateinit var vm : ChatViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,17 +62,26 @@ class AddArticleActivity : AppCompatActivity() {
             article = binding.etArticle.text.toString()
             categori = binding.etKategori.text.toString()
             img = binding.imgArticle
-            if(title.isEmpty() || article.isEmpty() || categori.isEmpty() || getFile == null) {
-                Toast.makeText(this, "Pastikan semua bagian artikel telah lengkap!", Toast.LENGTH_LONG).show()
-            }
-            else {
-                vm.uploadArticle(title, article, categori, getFile!!)
-                vm.stMessage.observe(this){
-                    Toast.makeText(this, it.toString(), Toast.LENGTH_LONG).show()
+            fbAuth = FirebaseAuth.getInstance()
+            val nama = fbAuth.currentUser?.uid.toString()
+            vm.getUserr(nama)
+            vm.userData.observe(this){
+                val namas = it.username
+                if(title.isEmpty() || article.isEmpty() || categori.isEmpty() || getFile == null) {
+                    Toast.makeText(this, "Pastikan semua bagian artikel telah lengkap!", Toast.LENGTH_LONG).show()
                 }
-                Toast.makeText(this, "Berhasil upload artikel", Toast.LENGTH_LONG).show()
-            finish()
-        }
+                else {
+                    if (namas != null) {
+                        vm.uploadArticle(title, article, categori, getFile!!, namas)
+                    }
+                    vm.stMessage.observe(this){
+                        Toast.makeText(this, it.toString(), Toast.LENGTH_LONG).show()
+                    }
+                    Toast.makeText(this, "Berhasil upload artikel", Toast.LENGTH_LONG).show()
+                    finish()
+                }
+            }
+
         }
     }
 
