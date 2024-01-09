@@ -2,27 +2,28 @@ package com.example.happydog.ui.fragment.detection
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.happydog.R
-import com.example.happydog.Utils
 import com.example.happydog.databinding.FragmentDetectionBinding
 import com.example.happydog.getImageUri
 import com.example.happydog.ml.DiseaseModel
 import com.example.happydog.uriToBitmap
 import com.example.happydog.uriToFile
 import org.tensorflow.lite.DataType
-import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -33,7 +34,9 @@ class DetectionFragment : Fragment() {
     private val binding get() = _binding!!
     private var currentImageUri: Uri? = null
     private var getFile: Uri? = null
-    val imageSize = 224
+    var imageSize = 224
+    private val CAMERA_PERMISSION_REQUEST = 101
+    private val STORAGE_PERMISSION_REQUEST = 102
 
     private lateinit var result: TextView
 
@@ -51,10 +54,14 @@ class DetectionFragment : Fragment() {
             builder.setItems(options) { dialog, item ->
                 when {
                     options[item] == "Take Photo" -> {
-                        startCamera()
+                        if (checkCameraPermission()) {
+                            startCamera()
+                        }
                     }
                     options[item] == "Choose from Gallery" -> {
-                        pickImageFromGallery()
+                        if (checkStoragePermission()) {
+                            pickImageFromGallery()
+                        }
                     }
                     options[item] == "Cancel" -> dialog.dismiss()
                 }
@@ -68,12 +75,89 @@ class DetectionFragment : Fragment() {
     }
 
     private fun pickImageFromGallery() {
-        val intent = Intent()
-        intent.action = Intent.ACTION_GET_CONTENT
-        intent.type = "image/*"
-        val chooser = Intent.createChooser(intent, getString(R.string.choose_picture))
-        launchIntentGallery.launch(chooser)
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                android.Manifest.permission.READ_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            // Izin baca penyimpanan sudah diberikan, lanjut ke galeri
+            val intent = Intent()
+            intent.action = Intent.ACTION_GET_CONTENT
+            intent.type = "image/*"
+            val chooser = Intent.createChooser(intent, getString(R.string.choose_picture))
+            launchIntentGallery.launch(chooser)
+        } else {
+            // Minta izin baca penyimpanan
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
+                STORAGE_PERMISSION_REQUEST
+            )
+        }
     }
+
+    private fun showToast(message: String) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            CAMERA_PERMISSION_REQUEST -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    startCamera()
+                } else {
+                    showToast("Izin kamera diperlukan untuk menggunakan fitur ini")
+                }
+            }
+            STORAGE_PERMISSION_REQUEST -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    pickImageFromGallery()
+                } else {
+                    showToast("Izin baca penyimpanan diperlukan untuk menggunakan fitur ini")
+                }
+            }
+        }
+    }
+
+    private fun checkCameraPermission(): Boolean {
+        return if (ContextCompat.checkSelfPermission(
+                requireActivity(),
+                android.Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            true
+        } else {
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(android.Manifest.permission.CAMERA),
+                CAMERA_PERMISSION_REQUEST
+            )
+            false
+        }
+    }
+
+    private fun checkStoragePermission(): Boolean {
+        return if (ContextCompat.checkSelfPermission(
+                requireActivity(),
+                android.Manifest.permission.READ_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            true
+        } else {
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
+                STORAGE_PERMISSION_REQUEST
+            )
+            false
+        }
+    }
+
 
     private val launchIntentGallery = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -93,8 +177,22 @@ class DetectionFragment : Fragment() {
     }
 
     private fun startCamera() {
-        currentImageUri = activity?.let { getImageUri(it) }
-        launcherIntentCamera.launch(currentImageUri)
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                android.Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            // Izin kamera sudah diberikan, lanjut ke kamera
+            currentImageUri = activity?.let { getImageUri(it) }
+            launcherIntentCamera.launch(currentImageUri)
+        } else {
+            // Minta izin kamera
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(android.Manifest.permission.CAMERA),
+                CAMERA_PERMISSION_REQUEST
+            )
+        }
     }
 
     private val launcherIntentCamera = registerForActivityResult(
@@ -119,13 +217,14 @@ class DetectionFragment : Fragment() {
 
     private fun resultGenerator(imageBitmap: Bitmap){
         try {
+            val res = binding.tvResult
             val model = activity?.let { DiseaseModel.newInstance(it) }
 
             val inputFeature0 = TensorBuffer.createFixedSize(intArrayOf(1, 224, 224, 3), DataType.FLOAT32)
             val byteBuffer = ByteBuffer.allocateDirect(4 * imageSize * imageSize * 3)
             byteBuffer.order(ByteOrder.nativeOrder())
 
-            val intValues = IntArray(imageSize * imageSize)
+            val intValues = IntArray(imageBitmap.width * imageBitmap.height)
             imageBitmap.getPixels(intValues, 0, imageBitmap.width, 0, 0, imageBitmap.width, imageBitmap.height)
 //            imageBitmap.getPixels(intValues, 0, imageBitmap.width, 0, 0, imageBitmap.width, imageBitmap.height)
             var pixel = 0
@@ -152,6 +251,7 @@ class DetectionFragment : Fragment() {
             }
             val classes = arrayOf("Kutu","Cacing", "Ringworm", "Scabies")
             binding.tvResults.text = classes[maxPos]
+            res.visibility = View.VISIBLE
 
 //        var s = ""
 //        for (i in classes.indices){

@@ -1,25 +1,26 @@
 package com.example.happydog.ui
 
 import android.app.AlertDialog
+import android.app.ProgressDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.example.happydog.R
 import com.example.happydog.databinding.ActivityAddArticleBinding
-import com.example.happydog.databinding.ActivityRegisterBinding
 import com.example.happydog.getImageUri
 import com.example.happydog.mvvm.ChatViewModel
-import com.example.happydog.ui.fragment.profile.ProfileViewModel
 import com.example.happydog.uriToFile
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 
 class AddArticleActivity : AppCompatActivity() {
 
@@ -33,11 +34,20 @@ class AddArticleActivity : AppCompatActivity() {
     private var getFile: Uri? = null
     private lateinit var fbAuth : FirebaseAuth
     lateinit var vm : ChatViewModel
+    private val CAMERA_PERMISSION_REQUEST = 101
+    private val STORAGE_PERMISSION_REQUEST = 102
+
+    private lateinit var progressDialog: ProgressDialog
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAddArticleBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         vm = ViewModelProvider(this).get(ChatViewModel::class.java)
+
+        progressDialog = ProgressDialog(this)
+        progressDialog.setMessage("Uploading...")
+        progressDialog.setCancelable(false)
 
         binding.imgArticle.setOnClickListener {
             val options = arrayOf<CharSequence>("Take Photo", "Choose from Gallery", "Cancel")
@@ -46,10 +56,14 @@ class AddArticleActivity : AppCompatActivity() {
             builder.setItems(options) { dialog, item ->
                 when {
                     options[item] == "Take Photo" -> {
-                        startCamera()
+                        if (checkCameraPermission()) {
+                            startCamera()
+                        }
                     }
                     options[item] == "Choose from Gallery" -> {
-                        pickImageFromGallery()
+                        if (checkStoragePermission()) {
+                            pickImageFromGallery()
+                        }
                     }
                     options[item] == "Cancel" -> dialog.dismiss()
                 }
@@ -72,6 +86,7 @@ class AddArticleActivity : AppCompatActivity() {
                 }
                 else {
                     if (namas != null) {
+                        progressDialog.show()
                         vm.uploadArticle(title, article, categori, getFile!!, namas)
                     }
                     vm.stMessage.observe(this){
@@ -81,16 +96,103 @@ class AddArticleActivity : AppCompatActivity() {
                     finish()
                 }
             }
-
         }
     }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+
     private fun pickImageFromGallery() {
-        val intent = Intent()
-        intent.action = Intent.ACTION_GET_CONTENT
-        intent.type = "image/*"
-        val chooser = Intent.createChooser(intent, getString(R.string.choose_picture))
-        launchIntentGallery.launch(chooser)
+        if (ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.READ_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            // Izin baca penyimpanan sudah diberikan, lanjut ke galeri
+            val intent = Intent()
+            intent.action = Intent.ACTION_GET_CONTENT
+            intent.type = "image/*"
+            val chooser = Intent.createChooser(intent, getString(R.string.choose_picture))
+            launchIntentGallery.launch(chooser)
+        } else {
+            // Minta izin baca penyimpanan
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
+                STORAGE_PERMISSION_REQUEST
+            )
+        }
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun checkCameraPermission(): Boolean {
+        return if (ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            true
+        } else {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(android.Manifest.permission.CAMERA),
+                CAMERA_PERMISSION_REQUEST
+            )
+            false
+        }
+    }
+
+    private fun checkStoragePermission(): Boolean {
+        return if (ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.READ_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            true
+        } else {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
+                STORAGE_PERMISSION_REQUEST
+            )
+            false
+        }
+    }
+
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            CAMERA_PERMISSION_REQUEST -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    startCamera()
+                } else {
+                    showToast("Izin kamera diperlukan untuk menggunakan fitur ini")
+                }
+            }
+            STORAGE_PERMISSION_REQUEST -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    pickImageFromGallery()
+                } else {
+                    showToast("Izin baca penyimpanan diperlukan untuk menggunakan fitur ini")
+                }
+            }
+        }
     }
 
     private val launchIntentGallery = registerForActivityResult(
@@ -107,8 +209,22 @@ class AddArticleActivity : AppCompatActivity() {
     }
 
     private fun startCamera() {
-        currentImageUri = getImageUri(this)
-        launcherIntentCamera.launch(currentImageUri)
+        if (ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            // Izin kamera sudah diberikan, lanjut ke kamera
+            currentImageUri = this.let { getImageUri(it) }
+            launcherIntentCamera.launch(currentImageUri)
+        } else {
+            // Minta izin kamera
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(android.Manifest.permission.CAMERA),
+                CAMERA_PERMISSION_REQUEST
+            )
+        }
     }
 
     private val launcherIntentCamera = registerForActivityResult(

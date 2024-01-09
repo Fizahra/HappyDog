@@ -26,6 +26,7 @@ class ChatActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityChatBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        supportActionBar?.hide()
 
         val users = intent.getParcelableExtra<Users>("UserId")!!
         val nama = users.username
@@ -37,8 +38,7 @@ class ChatActivity : AppCompatActivity() {
         binding.tvStatus.text = users.status
         Glide.with(this).load(users.imageUrl).placeholder(R.drawable.logo_happyvet).into(binding.imgUser)
         binding.imgBack.setOnClickListener{
-            val intent = Intent(this, HomeFragment::class.java)
-            startActivity(intent)
+            onBackPressed()
         }
         binding.btnSend.setOnClickListener{
             val msg : String = binding.etChat.text.toString()
@@ -54,9 +54,6 @@ class ChatActivity : AppCompatActivity() {
         vm.getMessages(users.userid!!).observe(this, Observer {
             showChats(it)
         })
-        val firebase = FirebaseAuth.getInstance().currentUser
-//        val reference = FirebaseFirestore.getInstance().document()
-//            FirebaseDatabase.getInstance().getReference("users").child(users)
     }
 
     private fun showChats(list: List<Messages>) {
@@ -70,5 +67,10 @@ class ChatActivity : AppCompatActivity() {
         adapter.notifyDataSetChanged()
         binding.rvChat.adapter = adapter
 
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        finish()
     }
 }

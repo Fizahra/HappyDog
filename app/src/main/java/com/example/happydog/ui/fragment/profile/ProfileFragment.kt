@@ -3,7 +3,6 @@ package com.example.happydog.ui.fragment.profile
 import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.Intent
-import android.content.Intent.ACTION_GET_CONTENT
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
@@ -18,11 +17,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
-import android.Manifest
 import android.app.Activity.RESULT_OK
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
-import android.os.Build
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.happydog.R
 import com.example.happydog.Utils
@@ -37,7 +34,6 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageReference
 import java.io.ByteArrayOutputStream
-import java.io.File
 import java.util.UUID
 
 class ProfileFragment : Fragment(){
@@ -53,7 +49,8 @@ class ProfileFragment : Fragment(){
     lateinit var vm : ChatViewModel
     lateinit var nvm : ProfileViewModel
     lateinit var pd : ProgressDialog
-    private val CAMERA_PERMISSION_REQUEST_CODE = 1001
+    private val CAMERA_PERMISSION_REQUEST = 101
+    private val STORAGE_PERMISSION_REQUEST = 102
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -74,11 +71,6 @@ class ProfileFragment : Fragment(){
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-//        if (!allPermissionsGranted()) {
-//            requestPermissionLauncher.launch(REQUIRED_PERMISSIONS.toString())
-//        }
-
-
         fbAuth = FirebaseAuth.getInstance()
         pd = ProgressDialog(activity)
         vm = ViewModelProvider(this).get(ChatViewModel::class.java)
@@ -113,7 +105,17 @@ class ProfileFragment : Fragment(){
             }
             activity?.let { it1 ->
                 nvm.isLoading.observe(it1) {
-                    showLoading(it)
+                    if (it) {
+                        // Tampilkan loading
+                        pd.setMessage("Uploading...")
+                        pd.setCancelable(false)
+                        pd.show()
+                        binding.pbData.visibility = View.VISIBLE
+                    } else {
+                        // Sembunyikan loading
+                        pd.dismiss()
+                        binding.pbData.visibility = View.GONE
+                    }
                 }
             }
         }
@@ -125,10 +127,14 @@ class ProfileFragment : Fragment(){
             builder.setItems(options) { dialog, item ->
                 when {
                     options[item] == "Take Photo" -> {
-                        startCamera()
+                        if (checkCameraPermission()) {
+                            startCamera()
+                        }
                     }
                     options[item] == "Choose from Gallery" -> {
-                        pickImageFromGallery()
+                        if (checkStoragePermission()) {
+                            pickImageFromGallery()
+                        }
                     }
                     options[item] == "Cancel" -> dialog.dismiss()
                 }
@@ -136,21 +142,6 @@ class ProfileFragment : Fragment(){
             builder.show()
     }
      super.onViewCreated(view, savedInstanceState)
-    }
-
-    private fun requestCameraPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            requestPermissions(
-                arrayOf(Manifest.permission.CAMERA),
-                CAMERA_PERMISSION_REQUEST_CODE
-            )
-        }
-    }
-
-    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
-        ContextCompat.checkSelfPermission(
-            requireContext(), it
-        ) == PackageManager.PERMISSION_GRANTED
     }
 
     private fun logOut(){
@@ -168,11 +159,53 @@ class ProfileFragment : Fragment(){
     }
 
     private fun pickImageFromGallery() {
-        val intent = Intent()
-        intent.action = ACTION_GET_CONTENT
-        intent.type = "image/*"
-        val chooser = Intent.createChooser(intent, getString(R.string.choose_picture))
-        launchIntentGallery.launch(chooser)
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                android.Manifest.permission.READ_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            // Izin baca penyimpanan sudah diberikan, lanjut ke galeri
+            val intent = Intent()
+            intent.action = Intent.ACTION_GET_CONTENT
+            intent.type = "image/*"
+            val chooser = Intent.createChooser(intent, getString(R.string.choose_picture))
+            launchIntentGallery.launch(chooser)
+        } else {
+            // Minta izin baca penyimpanan
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
+                STORAGE_PERMISSION_REQUEST
+            )
+        }
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            CAMERA_PERMISSION_REQUEST -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    startCamera()
+                } else {
+                    showToast("Izin kamera diperlukan untuk menggunakan fitur ini")
+                }
+            }
+            STORAGE_PERMISSION_REQUEST -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    pickImageFromGallery()
+                } else {
+                    showToast("Izin baca penyimpanan diperlukan untuk menggunakan fitur ini")
+                }
+            }
+        }
     }
 
     private val launchIntentGallery = registerForActivityResult(
@@ -188,31 +221,6 @@ class ProfileFragment : Fragment(){
         }
     }
 
-    private fun takePhotoWithCamera() {
-        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        startActivityForResult(takePictureIntent, Utils.REQUEST_IMAGE_CAPTURE)
-    }
-
-
-    private val launchIntentCamera = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ){
-        if(it.resultCode == CAMERA_X_RESULT){
-            val myFile = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
-                it.data?.getSerializableExtra("picture", File::class.java)
-            }else{
-                @Suppress("DEPRECATION")
-                it.data?.getSerializableExtra("picture")
-            } as? Uri
-
-            val isBackCamera = it.data?.getBooleanExtra("isBackCamera", true) as Boolean
-            myFile?.let{ file ->
-//                rotateImage(file, isBackCamera)
-                getFile = file
-                binding.imgProfile.setImageBitmap(BitmapFactory.decodeFile(file.path))
-            }
-        }
-    }
 
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -233,27 +241,10 @@ class ProfileFragment : Fragment(){
         }
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted
-                // Initialize your camera-related code here
-            } else {
-                // Permission denied
-                // Handle the denial, show a message, or disable camera-related features
-            }
-        }
-    }
-
     private fun uploadImageToFirebaseStorage(imageBitmap: Bitmap?) {
         val baos = ByteArrayOutputStream()
+
+
         imageBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, baos)
         val data = baos.toByteArray()
         bitmap = imageBitmap!!
@@ -273,9 +264,58 @@ class ProfileFragment : Fragment(){
         }
     }
 
+    private fun checkCameraPermission(): Boolean {
+        return if (ContextCompat.checkSelfPermission(
+                requireActivity(),
+                android.Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            true
+        } else {
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(android.Manifest.permission.CAMERA),
+                CAMERA_PERMISSION_REQUEST
+            )
+            false
+        }
+    }
+
+    private fun checkStoragePermission(): Boolean {
+        return if (ContextCompat.checkSelfPermission(
+                requireActivity(),
+                android.Manifest.permission.READ_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            true
+        } else {
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
+                STORAGE_PERMISSION_REQUEST
+            )
+            false
+        }
+    }
+
+
     private fun startCamera() {
-        currentImageUri = getActivity()?.let { getImageUri(it) }
-        launcherIntentCamera.launch(currentImageUri)
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                android.Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            // Izin kamera sudah diberikan, lanjut ke kamera
+            currentImageUri = activity?.let { getImageUri(it) }
+            launcherIntentCamera.launch(currentImageUri)
+        } else {
+            // Minta izin kamera
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(android.Manifest.permission.CAMERA),
+                CAMERA_PERMISSION_REQUEST
+            )
+        }
     }
 
     private val launcherIntentCamera = registerForActivityResult(
@@ -292,36 +332,6 @@ class ProfileFragment : Fragment(){
             Log.d("Image URI", "showImage: $it")
             binding.imgProfile.setImageURI(it)
         }
-    }
-
-    private fun showLoading(isLoading: Boolean){
-        binding.pbData.visibility = if(isLoading) View.VISIBLE else View.GONE
-    }
-
-    private val launchIntentCameras = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ){
-        if(it.resultCode == CAMERA_X_RESULT){
-            val myFile = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
-                it.data?.getSerializableExtra("picture", File::class.java)
-            }else{
-                @Suppress("DEPRECATION")
-                it.data?.getSerializableExtra("picture")
-            } as? Uri
-
-            val isBackCamera = it.data?.getBooleanExtra("isBackCamera", true) as Boolean
-            myFile?.let{ file ->
-//                rotateImage(file, isBackCamera)
-                getFile = file
-                binding.imgProfile.setImageBitmap(BitmapFactory.decodeFile(file.path))
-            }
-        }
-    }
-
-    companion object{
-        const val CAMERA_X_RESULT = 200
-        private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
-        private const val REQUEST_CODE_PERMISSIONS= 10
     }
 
     override fun onDestroyView() {
